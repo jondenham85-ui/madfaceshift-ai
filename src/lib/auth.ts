@@ -8,10 +8,10 @@ import { prisma } from "./prisma";
 export const authOptions: NextAuthOptions = {
   adapter: PrismaAdapter(prisma) as any,
   providers: [
-    GoogleProvider({
+    ...(process.env.GOOGLE_CLIENT_ID?.includes('placeholder') ? [] : [GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
-    }),
+    })]),
     CredentialsProvider({
       name: "credentials",
       credentials: {
