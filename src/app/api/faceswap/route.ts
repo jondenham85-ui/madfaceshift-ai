@@ -3,9 +3,8 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ratelimit } from "@/lib/ratelimit";
-import Replicate from "replicate";
 
-const replicate = new Replicate({ auth: process.env.REPLICATE_API_TOKEN! });
+const FAL_KEY = process.env.FAL_KEY!;
 
 export async function POST(req: NextRequest) {
   const session = await getServerSession(authOptions);
@@ -17,6 +16,7 @@ export async function POST(req: NextRequest) {
 
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
+
   if (user.swapsUsed >= user.swapsLimit) {
     return NextResponse.json({ error: "Swap limit reached. Upgrade your plan!" }, { status: 403 });
   }
@@ -31,15 +31,41 @@ export async function POST(req: NextRequest) {
   });
 
   try {
-    const output = await replicate.run("yan-ops/face_swap", {
-      input: { local_source: sourceUrl, local_target: targetUrl },
+    const response = await fetch("https://fal.run/fal-ai/face-swap", {
+      method: "POST",
+      headers: {
+        "Authorization": "Key " + FAL_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        base_image_url: targetUrl,
+        swap_image_url: sourceUrl,
+      }),
     });
-    const resultUrl = typeof output === "string" ? output : (output as any)?.[0] || "";
-    await prisma.swap.update({ where: { id: swap.id }, data: { resultUrl, status: "completed" } });
-    await prisma.user.update({ where: { id: userId }, data: { swapsUsed: { increment: 1 } } });
+
+    if (!response.ok) {
+      throw new Error(await response.text());
+    }
+
+    const data = await response.json();
+    const resultUrl = data.image?.url || "";
+
+    await prisma.swap.update({
+      where: { id: swap.id },
+      data: { resultUrl, status: "completed" }
+    });
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { swapsUsed: { increment: 1 } }
+    });
+
     return NextResponse.json({ resultUrl, swapsUsed: user.swapsUsed + 1, swapsLimit: user.swapsLimit });
   } catch (error: any) {
-    await prisma.swap.update({ where: { id: swap.id }, data: { status: "failed" } });
+    await prisma.swap.update({
+      where: { id: swap.id },
+      data: { status: "failed" }
+    });
     return NextResponse.json({ error: error.message || "Face swap failed" }, { status: 500 });
   }
 }
