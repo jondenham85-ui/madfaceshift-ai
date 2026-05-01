@@ -9,28 +9,27 @@ export default function WaitlistForm() {
   const [message, setMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setStatus('loading');
-    try {
-      const res = await fetch('/api/waitlist', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, name }),
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setStatus('success');
-        setMessage(data.message);
-        setEmail('');
-        setName('');
-      } else {
-        setStatus('error');
-        setMessage(data.error || 'Something went wrong');
-      }
-    } catch {
-      setStatus('error');
-      setMessage('Network error. Please try again.');
-    }
+        e.preventDefault();
+        setStatus('loading');
+        try {
+                const res = await fetch('/api/waitlist', {
+                          method: 'POST',                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify({ email, name }),
+                });
+                const data = await res.json();
+                if (res.ok) {
+                          setStatus('success');
+                          setMessage(data.message);
+                          setEmail('');
+                          setName('');
+                } else {
+                          setStatus('error');
+                          setMessage(data.error || 'Something went wrong');
+                }
+        } catch {
+                setStatus('error');
+                setMessage('Network error. Please try again.');
+        }
   };
 
   const h = React.createElement;

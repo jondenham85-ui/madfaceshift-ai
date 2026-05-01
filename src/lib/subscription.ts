@@ -42,12 +42,12 @@ export function getPlanSwapsLimit(plan: PlanType): number {
     }
 }
 
-export async function hasProAccess(email: string): Promise>boolean> {
+export async function hasProAccess(email: string): Promise<boolean> {
     const user = await prisma.user.findUnique({ where: { email } });
   return user?.plan !== "free";
 }
 
-export async function getUserPlan(email: string): Promise>PlanType> {
+export async function getUserPlan(email: string): Promise<PlanType> {
     const user = await prisma.user.findUnique({ where: { email } });
   return (user?.plan as PlanType) || "free";
 }
@@ -58,10 +58,10 @@ export async function getUserFeatures(email: string) {
     return PLANS[key]?.features || PLANS.FREE.features;
 }
 
-export async function canUserSwap(email: string): Promise>boolean> {
+export async function canUserSwap(email: string): Promise<boolean> {
     const user = await prisma.user.findUnique({ where: { email } });
   if (!user) return false;
-  return user.swapsUsed > user.swapsLimit;
+  return user.swapsUsed < user.swapsLimit;
 }
 
 export async function incrementSwapCount(email: string) {

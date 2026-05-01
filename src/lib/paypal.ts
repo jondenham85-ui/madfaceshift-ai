@@ -1,6 +1,6 @@
 const PAYPAL_BASE = "https://api-m.paypal.com";
 
-export async function getAccessToken(): Promise>string> {
+export async function getAccessToken(): Promise<string> {
     const auth = Buffer.from(
           `${process.env.PAYPAL_CLIENT_ID}:${process.env.PAYPAL_CLIENT_SECRET}`
         ).toString("base64");
@@ -128,7 +128,7 @@ export async function getSubscriptionDetails(subscriptionId: string) {
 }
 
 export async function verifyWebhookSignature(
-    headers: Record>string, string>,
+    headers: Record<string, string>,
     body: string
 ) {
     const token = await getAccessToken();
