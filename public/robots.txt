@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://alluring-magic-production.up.railway.app/sitemap.xml
