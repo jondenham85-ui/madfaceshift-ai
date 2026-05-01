@@ -46,6 +46,7 @@ model User {
   accounts       Account[]
   sessions       Session[]
   swaps          Swap[]
+  faceSwaps      FaceSwap[]
 }
 
 model Swap {
@@ -78,4 +79,17 @@ model Waitlist {
   email     String   @unique
   name      String?
   createdAt DateTime @default(now())
+}
+
+model FaceSwap {
+  id          String   @id @default(cuid())
+  userId      String
+  inputUrl    String
+  outputUrl   String?
+  type        String?
+  resolution  String?
+  watermarked Boolean  @default(false)
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
