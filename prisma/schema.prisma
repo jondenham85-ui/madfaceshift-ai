@@ -71,3 +71,11 @@ model Setting {
   key   String @unique
   value String @db.Text
 }
+
+
+model Waitlist {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+}
